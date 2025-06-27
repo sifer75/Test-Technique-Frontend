@@ -75,7 +75,7 @@ function ManualLogEntryForm({ id }: ManualLogEntryFormProps) {
       )}
       <div
         id={`ManualLogEntryForm__selects__container__${id}`}
-        className="flex"
+        className="flex flex-col lg:flex-row "
       >
         <div
           id={`ManualLogEntryForm__error__wrapper__level__${id}`}
