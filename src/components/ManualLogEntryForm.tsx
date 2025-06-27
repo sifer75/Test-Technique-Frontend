@@ -1,14 +1,12 @@
-import SelectFilter from "../ArrayOfLogs/filtersInputs/SelectFilter";
-import {
-  levels,
-  services,
-} from "../ArrayOfLogs/filtersInputs/SelectFilter.utils";
-import { createLog } from "../../lib/logs.request";
+import SelectFilter from "./inputs/filtersInputs/SelectFilter";
+
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { logSchema } from "../../lib/logs.schema";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { logSchema } from "../lib/logs.schema";
+import { createLog } from "../lib/logs.request";
+import { levels, services } from "./inputs/filtersInputs/SelectFilter.utils";
 
 interface ManualLogEntryFormProps {
   id: string;
