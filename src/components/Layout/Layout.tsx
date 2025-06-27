@@ -9,7 +9,7 @@ interface LayoutProps {
 
 function Layout({ id, children }: LayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen min-w-[320px] flex flex-col bg-gray-50">
       <Header id={`Layout__header__${id}`} />
       {children}
       <Footer id={`Layout__footer__${id}`} />
