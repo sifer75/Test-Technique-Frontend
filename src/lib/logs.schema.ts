@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const logSchema = z.object({
-  level: z.string().min(1, "level required"),
-  service: z.string().min(1, "service required"),
+  level: z.enum(["", "fatal", "error", "warn", "info", "debug"]),
+  service: z.enum(["", "auth", "payment", "notifications"]),
   message: z.string().min(1, "message required"),
 });
