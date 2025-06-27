@@ -23,7 +23,7 @@ function SelectFilter<T extends string>({
   setSelectedValue,
 }: SelectFilterProps<T>) {
   return (
-    <div id={`SelectFilter__${label}__container__${id}`} className="p-2 flex-1">
+    <div id={`SelectFilter__${label}__container__${id}`} className="p-2 w-56">
       <label id={`SelectFilter__${label}__title__${id}`}>{label}</label>
       <select
         id={`SelectFilter__${label}__container__${id}`}
