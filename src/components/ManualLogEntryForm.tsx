@@ -1,6 +1,6 @@
 import SelectFilter from "./inputs/filtersInputs/SelectFilter";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,7 @@ interface ManualLogEntryFormProps {
 type LogFormData = z.infer<typeof logSchema>;
 
 function ManualLogEntryForm({ id }: ManualLogEntryFormProps) {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -30,6 +31,7 @@ function ManualLogEntryForm({ id }: ManualLogEntryFormProps) {
     onSuccess: () => {
       alert("log created succesfully");
       reset();
+      queryClient.invalidateQueries({ queryKey: ["logs"] });
     },
     onError: (error) => {
       alert(error.message || "Failed during log creation");
