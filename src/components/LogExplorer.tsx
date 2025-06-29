@@ -55,7 +55,6 @@ function LogExplorer({ id }: LogExplorerProps) {
   }
 
   const filters = { date, level, service };
-  console.log(date, "date");
 
   const {
     data: logsData,
