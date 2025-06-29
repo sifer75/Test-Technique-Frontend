@@ -1,7 +1,21 @@
+import { useEffect, useState } from "react";
+
 interface SearchBarProps {
   id: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+  debounceDelay: number;
 }
-function SearchBar({ id }: SearchBarProps) {
+function SearchBar({ id, setMessage, debounceDelay }: SearchBarProps) {
+  const [localValue, setLocalValue] = useState("");
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setMessage(localValue);
+    }, debounceDelay);
+
+    return () => clearTimeout(handler);
+  }, [localValue, setMessage, debounceDelay]);
+
   return (
     <div id={`SearchBar__container__${id}`} className="relative">
       <input
@@ -9,6 +23,7 @@ function SearchBar({ id }: SearchBarProps) {
         type="search"
         placeholder="Rechercher des logs ..."
         className="p-2 pl-10 border rounded-lg w-full shadow-sm"
+        onChange={(e) => setLocalValue(e.target.value)}
       />
       <svg
         id={`SearchBar__svg__loop__${id}`}
