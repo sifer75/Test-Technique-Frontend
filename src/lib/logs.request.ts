@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { LogsProps } from "./logs.utils";
+import type { LogLevelOption, LogServiceOption, LogsProps } from "./logs.utils";
 
 export const createLog = async (data: LogsProps) => {
   try {
@@ -14,13 +14,27 @@ export const createLog = async (data: LogsProps) => {
   }
 };
 
-export const getLogs = async (data: LogsProps) => {
+interface LogsParams {
+  date: string;
+  level: LogLevelOption;
+  service: LogServiceOption;
+}
+
+export const getLogs = async ({ date, level, service }: LogsParams) => {
+  const params = new URLSearchParams();
+
+  if (date) params.set("date", date);
+  if (level) params.set("level", level);
+  if (service) params.set("service", service);
+
   try {
-    const response = await axios.get(`http://localhost:3333/logs/search`, {
-      headers: { "Content-Type": "application/json" },
-      params: data,
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      `http://localhost:3333/logs/search?${params.toString()}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      },
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to fetch logs:", error);
