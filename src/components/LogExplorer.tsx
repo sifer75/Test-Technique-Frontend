@@ -1,201 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import SearchBar from "./inputs/Searchbar";
 import { getLogs } from "../lib/logs.request";
 import ShowFiltersButton from "./inputs/ShowFiltersButton";
 import Timestamp from "./inputs/filtersInputs/Timestamp";
 import ManualLogEntryForm from "./ManualLogEntryForm";
 import SelectFilter from "./inputs/filtersInputs/SelectFilter";
-import {
-  levels,
-  services,
-} from "./inputs/filtersInputs/SelectFilter.utils";
+import { levels, services } from "./inputs/filtersInputs/SelectFilter.utils";
 import type {
   LogLevelOption,
   LogServiceOption,
   LogsProps,
 } from "../lib/logs.utils";
+import { useQuery } from "@tanstack/react-query";
+import MessageRow from "./MessageRow";
+import { format } from "date-fns";
 
 interface LogExplorerProps {
   id: string;
 }
 
-const fakeLogs: LogsProps[] = [
-  {
-    id: "1",
-    timestamp: "2025-06-26T14:32:00Z",
-    level: "fatal",
-    service: "auth",
-    message: "Critical failure during token generation.",
-  },
-  {
-    id: "2",
-    timestamp: "2025-06-26T14:33:10Z",
-    level: "error",
-    service: "auth",
-    message: "GET /users failed with status 500.",
-  },
-  {
-    id: "3",
-    timestamp: "2025-06-26T14:34:05Z",
-    level: "warn",
-    service: "payment",
-    message: "Payment retry triggered after timeout.",
-  },
-  {
-    id: "4",
-    timestamp: "2025-06-26T14:35:20Z",
-    level: "info",
-    service: "auth",
-    message: "Admin logged in successfully.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-  {
-    id: "5",
-    timestamp: "2025-06-26T14:36:45Z",
-    level: "debug",
-    service: "notifications",
-    message: "Email queued for delivery.",
-  },
-];
+interface PaginatedLogs {
+  total: number;
+  page: number;
+  size: number;
+  results: LogsProps[];
+}
 
 function LogExplorer({ id }: LogExplorerProps) {
   const [showAdvancedFilters, setShowAdvancedFilter] = useState(false);
@@ -204,21 +33,40 @@ function LogExplorer({ id }: LogExplorerProps) {
   const [day, setDay] = useState(["", ""]);
   const [level, setLevel] = useState<LogLevelOption>("");
   const [service, setService] = useState<LogServiceOption>("");
-  const [results, setResults] = useState<number>(20);
 
-  useEffect(() => {
-    getLogs({
-      id: "",
-      timestamp: "",
-      level: "",
-      service: "",
-      message: "",
-    })
-      .then((res) => console.log("Logs:", res))
-      .catch((err) => console.error("Failed to fetch logs:", err));
-  }, []);
+  function formatedIsoDate(date: string): string {
+    return format(new Date(date), "yyyy/MM/dd");
+  }
 
-  console.log(level, "level", service, "service");
+  let date = "";
+
+  const fullYear = year.join("");
+  const fullMonth = month.join("");
+  const fullDay = day.join("");
+
+  if (fullYear.length === 4) {
+    date = fullYear;
+    if (fullMonth.length === 2) {
+      date += `-${fullMonth}`;
+      if (fullDay.length === 2) {
+        date += `-${fullDay}`;
+      }
+    }
+  }
+
+  const filters = { date, level, service };
+  console.log(date, "date");
+
+  const {
+    data: logsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<PaginatedLogs, Error>({
+    queryKey: ["logs", filters],
+    queryFn: () => getLogs(filters),
+  });
+
   return (
     <section
       id={`LogExplorer__container__${id}`}
@@ -228,7 +76,6 @@ function LogExplorer({ id }: LogExplorerProps) {
       <div className="flex flex-col gap-4">
         <h2 className="text-2xl text-gray-800 font-light">Logs System</h2>
         <SearchBar id={`LogExplorer__searchBar__${id}`} />
-
         <ShowFiltersButton
           id={`LogExplorer__showFiltersButton__${id}`}
           showAdvancedFilters={showAdvancedFilters}
@@ -262,11 +109,12 @@ function LogExplorer({ id }: LogExplorerProps) {
             options={services}
           />
         </div>
+        <button onClick={() => refetch()}>search</button>
       </div>
 
       <div className="overflow-x-auto bg-white rounded-lg flex flex-col gap-2 max-h-64 overflow-y-auto">
         <h1 className="text-xl text-gray-800 font-light p-2">
-          {results} Results
+          {logsData?.results.length ?? 0} Results
         </h1>
         <table className="min-w-full bg-gray-300">
           <thead className="bg-gray-300">
@@ -286,26 +134,43 @@ function LogExplorer({ id }: LogExplorerProps) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {fakeLogs.map((log, index) => (
-              <tr key={`${index}__${log.id}`}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {log.timestamp}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full`}
-                  >
-                    {log.level}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {log.service}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {log.message}
-                </td>
-              </tr>
-            ))}
+            {isLoading ? (
+              <MessageRow
+                id={`LogExplorer__messageRow__isLoading__${id}`}
+                txt="Loading logs..."
+              />
+            ) : isError ? (
+              <MessageRow
+                id={`LogExplorer__messageRow__isError__${id}`}
+                txt="Failed during fetching logs..."
+              />
+            ) : logsData?.results.length === 0 ? (
+              <MessageRow
+                id={`LogExplorer__messageRow__length__${id}`}
+                txt="No logs found."
+              />
+            ) : (
+              logsData?.results.map((log: LogsProps, index: number) => (
+                <tr key={`${index}__${log.id}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatedIsoDate(log.timestamp)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full`}
+                    >
+                      {log.level}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {log.service}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {log.message}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
