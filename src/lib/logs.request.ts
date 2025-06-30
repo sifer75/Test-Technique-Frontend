@@ -1,9 +1,10 @@
 import axios from "axios";
 import type { LogLevelOption, LogServiceOption, LogsProps } from "./logs.utils";
+const API_URL = import.meta.env.VITE_API_URL
 
 export const createLog = async (data: LogsProps) => {
   try {
-    const response = await axios.post(`http://localhost:3333/logs`, data, {
+    const response = await axios.post(`${API_URL}/logs`, data, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
@@ -36,7 +37,7 @@ export const getLogs = async ({
 
   try {
     const response = await axios.get(
-      `http://localhost:3333/logs/search?${params.toString()}`,
+      `${API_URL}/logs/search?${params.toString()}`,
       {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
