@@ -171,7 +171,7 @@ function LogExplorer({ id }: LogExplorerProps) {
         <table className="min-w-full bg-gray-300">
           <thead className="bg-gray-300">
             <tr>
-              {[].map((header) => (
+              {["timestamp", "level", "service", "message"].map((header) => (
                 <th
                   key={header}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
